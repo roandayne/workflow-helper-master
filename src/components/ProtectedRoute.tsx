@@ -1,9 +1,18 @@
-import { useSessionContext } from "@supabase/auth-helpers-react";
+import {
+  useSessionContext,
+  useSupabaseClient,
+} from "@supabase/auth-helpers-react";
 import React from "react";
 import { LoginPage } from "../containers/LoginPage";
+import { logout } from "../utils/auth";
 
 const ProtectedRoute: React.FC<any> = ({ children }) => {
   const { isLoading, session, error } = useSessionContext();
+  const supabase = useSupabaseClient();
+
+  const handleLogout = async () => {
+    await logout(supabase);
+  };
 
   if (isLoading) {
     return <></>;
@@ -14,7 +23,12 @@ const ProtectedRoute: React.FC<any> = ({ children }) => {
   }
 
   if (!session) {
+    console.log("waw");
     return <LoginPage />;
+  }
+
+  if (!session?.provider_token) {
+    handleLogout();
   }
 
   return children;

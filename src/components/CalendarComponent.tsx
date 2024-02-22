@@ -93,6 +93,7 @@ const CalendarComponent = () => {
     <Container>
       <Calendar
         localizer={localizer}
+        defaultView="day"
         events={eventsList}
         startAccessor="start"
         endAccessor="end"
