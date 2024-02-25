@@ -23,7 +23,6 @@ const ProtectedRoute: React.FC<any> = ({ children }) => {
   }
 
   if (!session) {
-    console.log("waw");
     return <LoginPage />;
   }
 

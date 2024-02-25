@@ -17,8 +17,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import React from "react";
+import React, { useEffect } from "react";
 import CalendarComponent from "../components/CalendarComponent";
+import Task from "../components/Task";
 import { logout } from "../utils/auth";
 
 const drawerWidth = 240;
@@ -31,6 +32,29 @@ const Home: React.FC<HomeProps> = ({ window }) => {
   const supabase = useSupabaseClient();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isClosing, setIsClosing] = React.useState(false);
+
+  const getUser = async () => {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (data?.user?.id) {
+      const { error } = await supabase
+        .from("users")
+        .insert({ user_id: data.user.id, email: data.user.email });
+
+      if (error) {
+        console.log("Error: ", error);
+      }
+    }
+
+    if (error) {
+      console.log("Error: ", error);
+    }
+  };
+
+  useEffect(() => {
+    getUser();
+    // eslint-disable-next-line
+  }, []);
 
   const handleLogout = async () => {
     await logout(supabase);
@@ -168,6 +192,7 @@ const Home: React.FC<HomeProps> = ({ window }) => {
         }}
       >
         <Toolbar />
+        <Task />
         <CalendarComponent />
       </Box>
     </Box>
