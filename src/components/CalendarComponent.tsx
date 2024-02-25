@@ -69,8 +69,6 @@ const CalendarComponent = () => {
           .split(",")
           .map((component: any) => parseInt(component.trim(), 10));
 
-        console.log("endDate", res.data);
-
         return {
           id: index + 1,
           title: item.summary,
@@ -80,14 +78,12 @@ const CalendarComponent = () => {
         };
       });
 
-      console.log("events", res.data.items);
-
       setEventsList(events);
     };
 
     getEvents();
     // eslint-disable-next-line
-  }, []);
+  }, [eventsList]);
 
   return (
     <Container>
