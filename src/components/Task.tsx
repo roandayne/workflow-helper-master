@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Card,
   CardActions,
@@ -24,15 +25,6 @@ interface Project {
   id: number;
   title: string;
   description: Text;
-}
-
-interface Status {
-  todo: boolean;
-  doing: boolean;
-  done: boolean;
-  blocked: boolean;
-  backlog: boolean;
-  close: boolean;
 }
 
 interface Priority {
@@ -63,15 +55,7 @@ const Task = () => {
   const [userId, setUserId] = useState<string>("");
   const [user, setUser] = useState<number | null>(null);
   const [isGcalEvent, setIsGcalEvent] = useState<boolean>(true);
-  const [status, setStatus] = useState<Status>({
-    todo: true,
-    doing: false,
-    done: false,
-    blocked: false,
-    backlog: false,
-    close: false,
-  });
-  const { todo, doing, done, blocked, backlog, close } = status;
+  const [status, setStatus] = useState<string>("todo");
 
   useEffect(() => {
     const getProjects = async () => {
@@ -111,6 +95,8 @@ const Task = () => {
 
       if (data) {
         setUser(data[0].id);
+      } else {
+        console.log(error);
       }
     };
 
@@ -119,13 +105,6 @@ const Task = () => {
     }
     // eslint-disable-next-line
   }, [userId]);
-  console.log("project", project);
-  const handleStatusChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setStatus({
-      ...status,
-      [event.target.name]: event.target.checked,
-    });
-  };
 
   const createCalendarEvent = async () => {
     console.log("Creating calendar event");
@@ -166,48 +145,41 @@ const Task = () => {
     setEventType(e.target.value);
   };
 
+  const handleStatus = (e: ChangeEvent<HTMLInputElement>) => {
+    setStatus(e.target.value);
+  };
+
   const handleCreateTaskClick = async () => {
     if (isGcalEvent) {
       createCalendarEvent();
     }
-
-    const eventStatus = Object.keys(status).find(
-      (key) => status[key as keyof Status] === true
-    );
-
     const { error } = await supabase.from("tasks").insert({
       title: eventName,
       description: eventDescription,
-      status: eventStatus,
+      status: status,
       project_id: project ? Number(project) : null,
       start: startDate.format(),
       end: endDate.format(),
       link: link,
       priority: priority,
       user_id: user,
+      type: eventType,
     });
 
     if (error) {
       console.log("Error: ", error);
     }
-
-    console.log(
-      "THIS",
-      eventName,
-      eventDescription,
-      eventType,
-      startDate.format(),
-      endDate.format(),
-      project,
-      isGcalEvent,
-      status
-    );
   };
 
   return (
-    <Container>
-      <Card>
-        <CardContent sx={{ display: "flex", flexDirection: "column" }}>
+    <Container sx={{ margin: "0 0 4rem 0" }}>
+      <Card sx={{ padding: "2rem" }}>
+        <CardContent
+          sx={{ display: "flex", flexDirection: "column", gap: "20px" }}
+        >
+          <Typography variant="h3" marginBottom={"20px"}>
+            Create a Task
+          </Typography>
           <TextField
             required
             id="outlined-required"
@@ -217,6 +189,12 @@ const Task = () => {
             onChange={(e) => setEventName(e.target.value)}
           />
           <RadioGroup
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              gap: "34px",
+              padding: 0,
+            }}
             aria-labelledby="demo-radio-buttons-group-label"
             value={eventType}
             onChange={handleEventType}
@@ -234,18 +212,22 @@ const Task = () => {
             />
           </RadioGroup>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DateTimePicker
-              value={startDate}
-              onChange={(date) => setStartDate(date)}
-              label="From"
-              name="startDateTime"
-            />
-            <DateTimePicker
-              value={endDate}
-              onChange={(date) => setEndDate(date)}
-              label="To"
-              name="endDateTime"
-            />
+            <Box sx={{ display: "flex", gap: "34px", padding: 0 }}>
+              <DateTimePicker
+                sx={{ width: "100%" }}
+                value={startDate}
+                onChange={(date) => setStartDate(date)}
+                label="From"
+                name="startDateTime"
+              />
+              <DateTimePicker
+                sx={{ width: "100%" }}
+                value={endDate}
+                onChange={(date) => setEndDate(date)}
+                label="To"
+                name="endDateTime"
+              />
+            </Box>
           </LocalizationProvider>
 
           {eventType !== "outOfOffice" && (
@@ -293,50 +275,52 @@ const Task = () => {
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
               />
-              <FormGroup>
+              <RadioGroup
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  padding: 0,
+                }}
+                aria-labelledby="demo-radio-buttons-group-label"
+                value={status}
+                onChange={handleStatus}
+                name="radio-buttons-group-status"
+              >
                 <FormControlLabel
-                  checked={todo}
-                  name="todo"
-                  control={
-                    <Checkbox onChange={handleStatusChange} defaultChecked />
-                  }
+                  value="todo"
+                  control={<Radio />}
                   label="ToDo"
                 />
                 <FormControlLabel
-                  checked={doing}
-                  name="doing"
-                  control={<Checkbox onChange={handleStatusChange} />}
+                  value="doing"
+                  control={<Radio />}
                   label="Doing"
                 />
                 <FormControlLabel
-                  checked={blocked}
-                  name="blocked"
-                  control={<Checkbox onChange={handleStatusChange} />}
-                  label="Blocked"
-                />
-                <FormControlLabel
-                  checked={done}
-                  name="done"
-                  control={<Checkbox onChange={handleStatusChange} />}
+                  value="done"
+                  control={<Radio />}
                   label="Done"
                 />
                 <FormControlLabel
-                  checked={backlog}
-                  name="backlog"
-                  control={<Checkbox onChange={handleStatusChange} />}
+                  value="blocked"
+                  control={<Radio />}
+                  label="Blocked"
+                />
+                <FormControlLabel
+                  value="backlog"
+                  control={<Radio />}
                   label="Backlog"
                 />
                 <FormControlLabel
-                  checked={close}
-                  name="close"
-                  control={<Checkbox onChange={handleStatusChange} />}
+                  value="close"
+                  control={<Radio />}
                   label="Close"
                 />
-              </FormGroup>
+              </RadioGroup>
             </>
           )}
         </CardContent>
-        <CardActions>
+        <CardActions sx={{ display: "flex", flexDirection: "column" }}>
           <FormGroup>
             <FormControlLabel
               control={<Checkbox defaultChecked />}

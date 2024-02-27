@@ -19,6 +19,7 @@ import {
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import React, { useEffect } from "react";
 import CalendarComponent from "../components/CalendarComponent";
+import KanbanBoard from "../components/KanbanBoard";
 import Task from "../components/Task";
 import { logout } from "../utils/auth";
 
@@ -192,6 +193,7 @@ const Home: React.FC<HomeProps> = ({ window }) => {
         }}
       >
         <Toolbar />
+        <KanbanBoard />
         <Task />
         <CalendarComponent />
       </Box>
